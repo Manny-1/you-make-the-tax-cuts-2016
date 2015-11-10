@@ -15,19 +15,19 @@
 	  <div id='container' class='row'></div>
 	</div>  
 	  <script id='template' type='text/ractive'>
-	  	<div class='row'>	
+	  	<div class='row taxItems'>	
 	  	<h2>First, rule in some tax changes</h2>
 	  	
 	     {{#each taxItems}}
-		    <div class='card'>
+		    <div class='card '>
 			    <div class='main'>
 				    <h3>{{title}}</h3>
 					<p>{{description}}</p>
 				</div>
 				<div class='footer'>
-					<div class='footer-bar' style='width: {{ (amount / total)*100 }}%;'>
+					<div class='footer-bar {{status}}' style='width: {{ (amount / total)*100 }}%;'>
 					</div>
-					<div class='footer-total'>
+					<div class='footer-total chartSans'>
 						{{textAmount}}
 					</div>
 					<div class='btn {{status}}' on-click='toggleItem'>
@@ -39,18 +39,19 @@
 			</div>
   		{{/each}}
   		</div>
-  		<div class='row'>
+  		<div class='row spendingItems'>
   		<h2>Then, spend some money</h2>
+
   		 {{#each spendingItems}}
-		    <div class='card'>
+		    <div class='card '>
 			    <div class='main'>
 				    <h3>{{title}}</h3>
 					<p>{{description}}</p>
 				</div>
 				<div class='footer'>
-					<div class='footer-bar' style='width: {{ (amount / total)*100 }}%;'>
+					<div class='footer-bar {{status}}' style='width: {{ (amount / total)*100 }}%;'>
 					</div>
-					<div class='footer-total'>
+					<div class='footer-total chartSans'>
 						{{textAmount}}
 					</div>
 					<div class='btn {{status}}' on-click='toggleItem'>
