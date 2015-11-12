@@ -35,6 +35,9 @@ if (!Array.prototype.filter) {
   };
 }
 
+iframeMessenger.enableAutoResize();
+
+
 
 
 function init() {
@@ -52,7 +55,7 @@ function init() {
 
 }
 
-function formatNumber(num){
+function formatNumber(num) {
         //console.log("num",num);
 
         //check if num is positive or negative
@@ -70,13 +73,15 @@ function formatNumber(num){
 
         }
 
-        return [num];
+        return num;
     }
 
 
 function buildTaxcuts(data) {
 	var total = 0;
 	var taxItems,spendingItems;
+	var revenue = 0;
+	var spending = 0;
 	var moneyPool = 0;
 
 	$.each(data, function(i,v) {
@@ -84,6 +89,7 @@ function buildTaxcuts(data) {
 		v.textAmount = formatNumber(v.amount);
 		total = total + v.amount;
 		v.status = 'out';
+		v.statusText = 'rule in';
 		
 	});
 
@@ -107,7 +113,52 @@ function buildTaxcuts(data) {
 		taxItems: taxItems,
 		spendingItems: spendingItems,
 		total: total,
-		moneyPool: moneyPool
+		moneyPool: moneyPool,
+		revenue: revenue,
+		spending: spending,
+		format: function (num) {
+
+        if ( num > 0 ) {
+            if ( num > 1000000000 ) return "$" + ( num / 1000000000 ).toFixed(1) + 'bn';
+            if ( num > 1000000 ) return "$" + ( num / 1000000 ).toFixed(1) + 'm';
+            else return "$" + String(num) ;
+        }
+
+        if ( num < 0 ) {
+            var posNum = num * -1;
+            if ( posNum > 1000000000 ) return "$-" + (posNum / 1000000000 ).toFixed(1) + 'bn';
+            if ( posNum > 1000000 ) return "$-" + (posNum / 1000000 ).toFixed(1) + 'm';
+            else return "$-" + String(posNum) ;
+        }
+
+        else return "$" + String(num) ;
+
+    	},
+    	moneyFormat: function (num) {
+    		if (num < 0) {
+    			return (num * -1) / total * 50 
+			}
+			else {
+				return (num / total )*50 
+			} 
+
+    	},
+    	moneyPos: function (num) {
+    		if (num > 0) {
+    			return  String(50 - (num  / total * 50)) + "%"
+			}
+			else {
+				return '50%'
+			} 
+    	},
+    	moneyClass: function(num) {
+    		if (num > 0) {
+    			return  'black'
+			}
+			else {
+				return 'red'
+			} 
+    	}
 		},
 	template: '#template'
 	});
@@ -116,21 +167,106 @@ function buildTaxcuts(data) {
 
 		console.log(event.context);
 
-		if (event.context.status === 'out') {
-			console.log('out')
-			ractive.set(event.keypath + '.status','in')
-			moneyPool = moneyPool + event.context.amount;
-			console.log(moneyPool);
+		//check if tax or spending
+
+		if (event.context.type === 'tax') {
+
+				console.log('tax');
+
+				if (event.context.status === 'out') {
+				console.log('out')
+				ractive.set(event.keypath + '.status','in')
+				ractive.set(event.keypath + '.statusText','rule out')
+				moneyPool = moneyPool + event.context.amount;
+				ractive.animate('moneyPool',moneyPool);
+				revenue = revenue + event.context.amount;
+				ractive.animate('revenue',revenue);
+				console.log(moneyPool);
+			}
+
+			else if (event.context.status === 'in') {
+				console.log('in')
+				ractive.set(event.keypath + '.status','out')
+				ractive.set(event.keypath + '.statusText','rule in')
+				moneyPool = moneyPool - event.context.amount;
+				ractive.animate('moneyPool',moneyPool);
+				ractive.set('moneyPool',moneyPool);
+				revenue = revenue - event.context.amount;
+				ractive.animate('revenue',revenue);
+				console.log(moneyPool);
+			}
+
 		}
 
-		else if (event.context.status === 'in') {
-			console.log('in')
-			ractive.set(event.keypath + '.status','out')
-			moneyPool = moneyPool - event.context.amount;
-			console.log(moneyPool);
-		}
+		if (event.context.type === 'spending') {
+
+				console.log('spending');
+			
+				if (event.context.status === 'out') {
+				console.log('out')
+				ractive.set(event.keypath + '.status','in')
+				ractive.set(event.keypath + '.statusText','rule out')
+				moneyPool = moneyPool - event.context.amount;
+				ractive.animate('moneyPool',moneyPool);
+				spending = spending + event.context.amount;
+				ractive.animate('spending',spending);
+				console.log(moneyPool);
+			}
+
+			else if (event.context.status === 'in') {
+				console.log('in')
+				ractive.set(event.keypath + '.status','out')
+				ractive.set(event.keypath + '.statusText','rule in')
+				moneyPool = moneyPool + event.context.amount;
+				ractive.animate('moneyPool',moneyPool);
+				spending = spending - event.context.amount;
+				ractive.animate('spending',spending);
+				console.log(moneyPool);
+			}
+
+		}  
+
+		
 		
 	});
+
+	//Sticky nav within iframe
+
+	if (window!=window.top) { 
+
+		var $end = $('#end');
+		var $sticky = $('.sticky-bar');
+
+		setInterval(function(){
+
+			iframeMessenger.getPositionInformation(function(data){
+			
+					var endPoint = $end.position().top
+					console.log(endPoint);
+					console.log("pageYOffSet", data['pageYOffset'], "iframeTop", data['iframeTop'], "innerHeight", data['innerHeight']);
+					console.log(data['innerHeight'] - data['iframeTop']);
+
+						if (data['iframeTop'] < 0 && data['iframeTop'] > (-1*(endPoint-60)) && (data['innerHeight'] - data['iframeTop']) < endPoint) {
+
+							$sticky.css({top: (-1*data['iframeTop']) + data['innerHeight'] - 60 + 'px'})
+
+						}
+
+						else if (data['iframeTop'] > 0 && (data['innerHeight'] - data['iframeTop']) < endPoint) {
+							console.log("yeah");
+							$sticky.css({top: data['innerHeight'] - data['iframeTop'] - 60})
+
+						}
+
+						else if ((data['innerHeight'] - data['iframeTop']) >= endPoint) {
+							$sticky.css({top: 'auto'})
+						}
+
+			});
+
+		}, 20);
+
+}
 
 }
 

@@ -1,14 +1,135 @@
-
-
 .card {
-	min-height:300px;
+	min-height:280px;
 	float:left;
-	width:29%;
+	width:32%;
 	margin-right:1%;
 	border-top:1px solid #dadada;
 	position: relative;
 	margin-bottom:10px;
+}
 
+.grid-wrapper {
+	max-width: 1260px;
+	margin-left: auto;
+	margin-right: auto;
+	margin-bottom:65px;
+}
+
+.sticky-bar {
+    box-shadow: 1px -1px 3px 2px rgba(0, 0, 0, 0.2);
+    /*padding-bottom: 0.5rem;*/
+    padding-top: 0.3rem;
+    position: fixed;
+    bottom: 0;
+    overflow:hidden;
+    /*left: -7px;*/
+    z-index: 100;
+    width: 100%;
+    height:60px;
+    background: #fff;
+    font-family:'Guardian Text Sans Web', 'Agate Sans', sans-serif;
+}
+
+.sticky-inner {
+	max-width: 1260px;
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+}
+
+.sticky-small {
+	font-size:0.8rem;
+	font-weight: normal;
+	color: rgba(0,0,0,.87);
+}
+
+.money-wrapper {
+
+	width: 50%;
+	position: absolute;
+	left:25%;
+	margin-left: auto;
+	margin-right: auto;
+	height:35px;
+}
+
+.money-total {
+	height:35px;
+	position: absolute;
+	left:50%;
+}
+
+.balance-marker {
+	height:35px;
+	position: absolute;
+	left:49.95%;
+	width:1px;
+	background:grey;
+	z-index:10;
+}
+
+.money-total.black {
+	background:#000;
+	-webkit-transition: background-color 0.15s ease-out;
+	transition: background-color 0.15s ease-out;
+}
+
+.money-total.red {
+	background: #b51800;
+	-webkit-transition: background-color 0.15s ease-out;
+	transition: background-color 0.15s ease-out;
+}
+
+.spending-figures .spending {
+    float:right;
+    font-weight: bold;
+    font-size: 1.5rem;
+    margin-right:2%;
+    color: #b51800;
+}
+
+.tag-text {
+	display: flex;
+	display: -webkit-flex;
+}
+
+.tag-text .spending {
+	float:right;
+	margin-right:2%;
+}
+
+.tag-text .revenue {
+	margin-left:2%;
+}
+
+.tag-text .balance {
+	margin:auto;
+/*	margin-right: auto;
+	margin-left: auto;
+	display: block;
+	float: right;*/
+	text-align: center;
+}
+
+.spending-figures .revenue {
+	font-size: 1.5rem;
+	font-weight:bold;
+	margin-left:2%;
+}
+
+.taxItems h2, .spendingItems h2  {
+	font-size:2rem;
+	margin-left:20px;
+	float: left;
+	margin-left:20px;
+	line-height:80px;
+	color:#005689;
+}
+
+.headerIcon {
+	width:80px;
+	height:80px;
+	float:left;
 }
 
 .card .main {
@@ -44,8 +165,6 @@
 	-webkit-transition: background-color 0.15s ease-out;
 	transition: background-color 0.15s ease-out;
 }
-
-
 
 .card .footer-total {
 	color:#FFF;
@@ -83,11 +202,41 @@
     width: 100%;
 }
 
-@media (max-width: 700px) {
+@media (max-width: 960px) {
+
+.card {
+width:49%;
+}
+
+}	
+
+@media (max-width: 600px) {
 
 .card {
 width:100%;
-margin:0;
+min-height:200px;
+margin-right:0;
 }
 
+.taxItems h2, .spendingItems h2 {
+	margin-left:0;
+	float: none;
+	line-height:2rem;
+	}
+
+.headerIcon {
+	float: none;
+}	
+
+.money-wrapper {
+	/*display: none;*/
+}
+
+.balance-marker {
+	height:25px;
+}
+
+.money-total {
+	height:25px;
+}
 }			

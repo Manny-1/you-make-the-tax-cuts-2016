@@ -4,6 +4,7 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<title>Interactive | The Guardian </title>
+		<link rel="stylesheet" type="text/css" href="css/normalize.css" />	
 	    <link rel="stylesheet" type="text/css" href="css/gu-aus.css" />	
 	    <link rel="stylesheet" type="text/css" href="css/main.css" />	
 		<style type="text/css">	
@@ -13,57 +14,96 @@
 	<body>
 	<div id="outer-wrapper">	
 	  <div id='container' class='row'></div>
+	  <div id="end"></div>
 	</div>  
 	  <script id='template' type='text/ractive'>
-	  	<div class='row taxItems'>	
-	  	<h2>First, rule in some tax changes</h2>
-	  	
-	     {{#each taxItems}}
-		    <div class='card '>
-			    <div class='main'>
-				    <h3>{{title}}</h3>
-					<p>{{description}}</p>
-				</div>
-				<div class='footer'>
-					<div class='footer-bar {{status}}' style='width: {{ (amount / total)*100 }}%;'>
+	  	<div class='grid-wrapper'>
+		  	<div class='row taxItems'>
+			  	<div class='row'>	
+			  		<img src='img/piggy.svg' class='headerIcon'/>
+			  		<h2>First, rule in some tax changes</h2>
+			  	</div>
+		     {{#each taxItems}}
+			    <div class='card '>
+				    <div class='main'>
+					    <h3>{{title}}</h3>
+						<p>{{description}}</p>
 					</div>
-					<div class='footer-total chartSans'>
-						{{textAmount}}
-					</div>
-					<div class='btn {{status}}' on-click='toggleItem'>
-						{{status}}
-					</div>
-					
+					<div class='footer'>
+						<div class='footer-bar {{status}}' style='width: {{ (amount / total)*100 }}%;'>
+						</div>
+						<div class='footer-total chartSans'>
+							{{format(amount)}}
+						</div>
+						<div class='btn {{status}}' on-click='toggleItem'>
+							{{statusText}}
+						</div>
+						
 
+					</div>
 				</div>
-			</div>
-  		{{/each}}
-  		</div>
-  		<div class='row spendingItems'>
-  		<h2>Then, spend some money</h2>
+	  		{{/each}}
+	  		</div>
+	  		<div class='row spendingItems'>
+		  		<div class='row'>
+		  			<img src='img/dollars.svg' class='headerIcon'/>
+		  			<h2>Then, spend some money</h2>
+		  		</div>
+	  		 {{#each spendingItems}}
+			    <div class='card '>
+				    <div class='main'>
+					    <h3>{{title}}</h3>
+						<p>{{description}}</p>
+					</div>
+					<div class='footer'>
+						<div class='footer-bar {{status}}' style='width: {{ (amount / total)*100 }}%;'>
+						</div>
+						<div class='footer-total chartSans'>
+							{{format(amount)}}
+						</div>
+						<div class='btn {{status}}' on-click='toggleItem'>
+							{{statusText}}
+						</div>
+					</div>
+				</div>
+	  		{{/each}}
+	  		</div>
+	  	</div>	
+  		<div class='sticky-bar'>
+  			<div class='sticky-inner'>
+  				<div class='spending-figures'>
+  				<span class='revenue'>
+  					{{format(revenue)}}
+  					
 
-  		 {{#each spendingItems}}
-		    <div class='card '>
-			    <div class='main'>
-				    <h3>{{title}}</h3>
-					<p>{{description}}</p>
-				</div>
-				<div class='footer'>
-					<div class='footer-bar {{status}}' style='width: {{ (amount / total)*100 }}%;'>
-					</div>
-					<div class='footer-total chartSans'>
-						{{textAmount}}
-					</div>
-					<div class='btn {{status}}' on-click='toggleItem'>
-						{{status}}
-					</div>
-				</div>
-			</div>
-  		{{/each}}
+  				<span class='money-wrapper'>
+  					<span class='balance-marker'></span>
+  					<span class='money-total {{moneyClass(moneyPool)}}' style='width: {{ moneyFormat(moneyPool)}}%; left:{{ moneyPos(moneyPool)}};'>
+  					</span>
+  				</span>
+
+  				<span class='spending'>
+  					
+  					{{format(spending)}}
+  				</span>
+  				</div>
+  				<div class="tag-text sticky-small">
+  					<span class='revenue'>
+  						revenue
+  					</span>
+  					<span class='balance'>
+  						balance
+  					</span>
+  					<div class='spending'>
+  						spending
+  					</div>
+  				<div>
+
   		</div>
 	  </script>
-
+	  <script src="http://interactive.guim.co.uk/libs/iframe-messenger/iframeMessenger.js" type="text/javascript"></script>
 	  <script src='js/jquery-1.11.1.min.js'></script>
+	  <script src='js/modernizr-custom.js'></script>
 	  <script src='js/ractive.js'></script>
 	  <script src='js/main.js'></script>
 

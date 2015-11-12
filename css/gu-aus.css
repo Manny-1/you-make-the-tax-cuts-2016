@@ -29,6 +29,15 @@ font-size: 100%;
 h1, h2, h3, h4, h5, h6 {
 	margin: 0;
 }
+
+h1 {
+  font-size:2.25rem;
+}
+
+h2 {
+  margin-bottom: 0.0625rem;
+  font-size: 1.25rem;
+}
     
 
 body {
@@ -38,7 +47,7 @@ color:#000;
 background:#fff}
 
 #outer-wrapper{
-  max-width: 1260px;
+/*  max-width: 1260px;*/
   position: relative;
   border-bottom: 1px solid #dcdcdc;
 }
