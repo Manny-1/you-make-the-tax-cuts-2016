@@ -42,9 +42,10 @@ iframeMessenger.enableAutoResize();
 
 function init() {
 
+
 	//get spreadsheet data
 
-	var url = "http://interactive.guim.co.uk/docsdata/1dWJohsLU1Rm-0yeJI9sxjGmzopQBrfME4NKY0xNtRQg.json";
+	var url = "https://interactive.guim.co.uk/docsdata/1dWJohsLU1Rm-0yeJI9sxjGmzopQBrfME4NKY0xNtRQg.json";
 
 	$.getJSON(url, function(spreadsheet){
 
@@ -77,20 +78,141 @@ function formatNumber(num) {
     }
 
 
+
+//Hash url - store custom ministry values in url hash
+
+function hashUrl() {
+
+	var linkURL,tweetLinkURL;
+	var tempList = [];
+
+	ministry.forEach(function(d,i){
+		tempList.push(d['polID']+'-'+d['minID']);
+	});
+
+	urlString = "#" + tempList.join(",");
+
+	// var linkURL,tweetLinkURL;
+
+	if ( window.self !== window.top ) {
+		iframeMessenger.navigate(urlString);
+		iframeMessenger.getLocation(function(parLocation) {
+		linkURL = parLocation['origin'] + parLocation['pathname'] + "%23" + tempList.join(",");
+		tweetLinkURL = "https://twitter.com/intent/tweet?text=Here's+my+ideal+new+parliamentary+cabinet+&url=" + linkURL;	
+		$("#tweet").attr("href", tweetLinkURL);
+	});
+
+	}
+
+	else {
+		window.location.hash = urlString;
+		linkURL = window.location.origin + window.location.pathname + "%23" + tempList.join(",");
+		tweetLinkURL = "https://twitter.com/intent/tweet?text=Here's+my+ideal+new+parliamentary+cabinet&url=" + linkURL;	
+		$("#tweet").attr("href", tweetLinkURL);
+	}
+
+}
+
+function parseHash() {
+
+	if (window.self !== window.top) {
+	 iframeMessenger.getLocation(function(parLocation){
+	   var urlHash = parLocation['hash'];
+	   if (urlHash != "") {
+			urlHash = urlHash.replace("#?","");
+		    hashData = urlHash.split(",");
+		    return hashData;
+	   }
+	   else {
+	   		return null;
+	   }
+
+	 });
+   	}
+
+   	else {
+	   var urlHash = location.hash;
+	   if (urlHash != "") {
+			urlHash = urlHash.replace("#?","");
+			hashData = urlHash.split(",");
+			return hashData;
+	   }
+
+	   else {
+	   	return null;
+	   }
+	}
+
+};
+
+
+
 function buildTaxcuts(data) {
+
 	var total = 0;
 	var taxItems,spendingItems;
 	var revenue = 0;
 	var spending = 0;
 	var moneyPool = 0;
 	var groupTitles = [];
+	var hashData = parseHash();
+ 	var hashList = [];
+
+
+	function hashUrl(data) {
+
+		var urlString = "#?" + data.join(",");
+
+		// var linkURL,tweetLinkURL;
+
+		if ( window.self !== window.top ) {
+			iframeMessenger.navigate(urlString);
+			iframeMessenger.getLocation(function(parLocation) {
+			linkURL = parLocation['origin'] + parLocation['pathname'] + "%23" + data.join(",");
+			tweetLinkURL = "https://twitter.com/intent/tweet?text=Here's+my+ideal+new+parliamentary+cabinet+&url=" + linkURL;	
+			$("#tweet").attr("href", tweetLinkURL);
+		});
+
+		}
+
+		else {
+			window.location.hash = urlString;
+			linkURL = window.location.origin + window.location.pathname + "%23" + data.join(",");
+			tweetLinkURL = "https://twitter.com/intent/tweet?text=Here's+my+ideal+new+parliamentary+cabinet&url=" + linkURL;	
+			$("#tweet").attr("href", tweetLinkURL);
+		}
+
+	}
+
+ 	function updateHashList(n,action) {
+ 		if (action === 'add') {
+ 			hashList.push(n);
+ 		}
+ 		else if (action === 'remove') {
+ 			var i = hashList.indexOf(n);
+			if(i != -1) {
+				hashList.splice(i, 1);
+			}
+ 		}
+ 		console.log(hashList);
+ 		hashUrl(hashList);
+ 	}
+
+	console.log("hashData", hashData);
 
 	$.each(data, function(i,v) {
 		v.amount = +v.amount;
 		v.textAmount = formatNumber(v.amount);
 		total = total + v.amount;
-		v.status = 'out';
-		v.statusText = 'rule in';
+		if (hashData.indexOf(String(i)) != -1) {
+			v.status = 'in';
+			v.statusText = 'rule out';
+		}
+		else {
+			v.status = 'out';
+			v.statusText = 'rule in';
+		}
+		
 		v.id = i;
 		if (v.group != "") {
 			if (groupTitles.indexOf(v.group) == -1) {
@@ -113,7 +235,15 @@ function buildTaxcuts(data) {
 	taxItems = data.filter(function(d) {
 		if (d.type === 'tax') {
 			return d;
+
 		}
+	});
+
+	taxItems.forEach(function(d) {
+		if (hashData.indexOf(String(d.id)) != -1) {
+				revenue = revenue + d['amount'];
+				moneyPool = moneyPool + d['amount'];
+			};
 	});
 
 	spendingItems = data.filter(function(d) {
@@ -122,7 +252,16 @@ function buildTaxcuts(data) {
 		}
 	});
 
-	console.log(data,taxItems);
+	spendingItems.forEach( function(d) {
+		if (hashData.indexOf(String(d.id)) != -1) {
+				spending = spending + d['amount'];
+				moneyPool = moneyPool - d['amount'];
+			};
+	})
+
+
+
+	console.log(revenue,spending,moneyPool);
 
 	var ractive = new Ractive({
 	el: '#container',
@@ -200,6 +339,8 @@ function buildTaxcuts(data) {
 				revenue = revenue + event.context.amount;
 				ractive.animate('revenue',revenue);
 				console.log(moneyPool);
+				console.log(taxItems);
+				updateHashList(event.context.id,'add');
 			}
 
 			else if (event.context.status === 'in') {
@@ -212,8 +353,9 @@ function buildTaxcuts(data) {
 				revenue = revenue - event.context.amount;
 				ractive.animate('revenue',revenue);
 				console.log(moneyPool);
+				updateHashList(event.context.id,'remove');
 			}
-
+			
 		}
 
 		if (event.context.type === 'spending') {
@@ -229,6 +371,7 @@ function buildTaxcuts(data) {
 				spending = spending + event.context.amount;
 				ractive.animate('spending',spending);
 				console.log(moneyPool);
+				updateHashList(event.context.id,'add');
 			}
 
 			else if (event.context.status === 'in') {
@@ -240,7 +383,9 @@ function buildTaxcuts(data) {
 				spending = spending - event.context.amount;
 				ractive.animate('spending',spending);
 				console.log(moneyPool);
+				updateHashList(event.context.id,'remove');
 			}
+
 
 		}  
 		
@@ -273,19 +418,8 @@ function buildTaxcuts(data) {
 					}
 				});
 				ractive.set('taxItems',taxItems);
+				updateHashList(event.context.id,'add');
 
-
-			}
-			else if (event.context.status === 'in') {
-				console.log('in')
-				ractive.set(event.keypath + '.status','out')
-				ractive.set(event.keypath + '.statusText','rule in')
-				moneyPool = moneyPool - event.context.amount;
-				ractive.animate('moneyPool',moneyPool);
-				ractive.set('moneyPool',moneyPool);
-				revenue = revenue - event.context.amount;
-				ractive.animate('revenue',revenue);
-				console.log(moneyPool);
 			}
 		}
 
@@ -311,6 +445,7 @@ function buildTaxcuts(data) {
 					}
 				});
 				ractive.set('taxItems',taxItems);
+				updateHashList(event.context.id,'remove');
 			
 			}
 
@@ -318,7 +453,9 @@ function buildTaxcuts(data) {
 				console.log('unavailable');
 			}
 
+
 		}
+
 
 	});	
 	
