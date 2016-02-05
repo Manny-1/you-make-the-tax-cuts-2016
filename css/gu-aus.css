@@ -13,11 +13,11 @@ src:url('//pasteup.guim.co.uk/fonts/0.1.0/hinting-on/kerning-on/original/Guardia
 
 @font-face {
 font-family:'Guardian Agate Sans';
-src:url('http://pasteup.guim.co.uk/fonts/latin1/Guardian-Ag-Sans-1-Web-Reg.eot');src:url('http://pasteup.guim.co.uk/fonts/latin1/Guardian-Ag-Sans-1-Web-Reg.eot?#iefix') format('embedded-opentype'),url('http://pasteup.guim.co.uk/fonts/latin1/Guardian-Ag-Sans-1-Web-Reg.woff') format('woff'),url('http://pasteup.guim.co.uk/fonts/latin1/Guardian-Ag-Sans-1-Web-Reg.ttf') format('truetype'),url('http://pasteup.guim.co.uk/fonts/latin1/Guardian-Ag-Sans-1-Web-Reg.svg#Guardian-Text-Egyp-Web-Reg') format('svg');font-weight:normal;font-style:normal;font-stretch:normal}
+src:url('https://pasteup.guim.co.uk/fonts/latin1/Guardian-Ag-Sans-1-Web-Reg.eot');src:url('https://pasteup.guim.co.uk/fonts/latin1/Guardian-Ag-Sans-1-Web-Reg.eot?#iefix') format('embedded-opentype'),url('https://pasteup.guim.co.uk/fonts/latin1/Guardian-Ag-Sans-1-Web-Reg.woff') format('woff'),url('https://pasteup.guim.co.uk/fonts/latin1/Guardian-Ag-Sans-1-Web-Reg.ttf') format('truetype'),url('https://pasteup.guim.co.uk/fonts/latin1/Guardian-Ag-Sans-1-Web-Reg.svg#Guardian-Text-Egyp-Web-Reg') format('svg');font-weight:normal;font-style:normal;font-stretch:normal}
 
 @font-face {
 font-family:'Guardian Agate Sans';
-src:url('http://pasteup.guim.co.uk/fonts/latin1/Guardian-Ag-Sans-1-Web-Bold.eot');src:url('http://pasteup.guim.co.uk/fonts/latin1/Guardian-Ag-Sans-1-Web-Bold.eot?#iefix') format('embedded-opentype'),url('http://pasteup.guim.co.uk/fonts/latin1/Guardian-Ag-Sans-1-Web-Bold.woff') format('woff'),url('http://pasteup.guim.co.uk/fonts/latin1/Guardian-Ag-Sans-1-Web-Bold.ttf') format('truetype'),url('http://pasteup.guim.co.uk/fonts/latin1/Guardian-Ag-Sans-1-Web-Bold.svg#Guardian-Text-Egyp-Web-Medium') format('svg');font-weight:bold;font-style:normal;font-stretch:normal}
+src:url('https://pasteup.guim.co.uk/fonts/latin1/Guardian-Ag-Sans-1-Web-Bold.eot');src:url('https://pasteup.guim.co.uk/fonts/latin1/Guardian-Ag-Sans-1-Web-Bold.eot?#iefix') format('embedded-opentype'),url('https://pasteup.guim.co.uk/fonts/latin1/Guardian-Ag-Sans-1-Web-Bold.woff') format('woff'),url('https://pasteup.guim.co.uk/fonts/latin1/Guardian-Ag-Sans-1-Web-Bold.ttf') format('truetype'),url('https://pasteup.guim.co.uk/fonts/latin1/Guardian-Ag-Sans-1-Web-Bold.svg#Guardian-Text-Egyp-Web-Medium') format('svg');font-weight:bold;font-style:normal;font-stretch:normal}
 
 html {
 -webkit-font-smoothing:antialiased;

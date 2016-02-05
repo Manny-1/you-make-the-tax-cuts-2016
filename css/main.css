@@ -154,6 +154,12 @@
 	transition: background-color 0.15s ease-out;
 }
 
+.taxItems .footer-bar.unavailable {
+	background-color: #BBBBBB;
+	-webkit-transition: background-color 0.15s ease-out;
+	transition: background-color 0.15s ease-out;
+}
+
 .spendingItems .footer-bar {
 	background: #000;
 	-webkit-transition: background-color 0.15s ease-out;

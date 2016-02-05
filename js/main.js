@@ -44,7 +44,7 @@ function init() {
 
 	//get spreadsheet data
 
-	var url = "http://interactive.guim.co.uk/docsdata/1MwBCUDPSQufh_eYih8NcQzNXHIPjZ5kf9rrRlREmXBE.json";
+	var url = "http://interactive.guim.co.uk/docsdata/1dWJohsLU1Rm-0yeJI9sxjGmzopQBrfME4NKY0xNtRQg.json";
 
 	$.getJSON(url, function(spreadsheet){
 
@@ -83,6 +83,7 @@ function buildTaxcuts(data) {
 	var revenue = 0;
 	var spending = 0;
 	var moneyPool = 0;
+	var groupTitles = [];
 
 	$.each(data, function(i,v) {
 		v.amount = +v.amount;
@@ -90,8 +91,24 @@ function buildTaxcuts(data) {
 		total = total + v.amount;
 		v.status = 'out';
 		v.statusText = 'rule in';
+		v.id = i;
+		if (v.group != "") {
+			if (groupTitles.indexOf(v.group) == -1) {
+				groupTitles.push(v.group);
+			}
+		};
 		
 	});
+
+	console.log(groupTitles);
+
+	groupStatus = {};
+
+	groupTitles.forEach( function(title) {
+		groupStatus[title] = true;
+	});
+
+	console.log(groupStatus);
 
 	taxItems = data.filter(function(d) {
 		if (d.type === 'tax') {
@@ -116,6 +133,7 @@ function buildTaxcuts(data) {
 		moneyPool: moneyPool,
 		revenue: revenue,
 		spending: spending,
+		groupStatus: groupStatus,
 		format: function (num) {
 
         if ( num > 0 ) {
@@ -225,10 +243,85 @@ function buildTaxcuts(data) {
 			}
 
 		}  
-
-		
 		
 	});
+
+	ractive.on( 'toggleItemGroup', function (event) {
+		console.log(event.context);
+		console.log("toggleItemGroup");
+
+		//has anythin in the group been selected?
+
+		if (groupStatus[event.context.group] == true) {
+
+			if (event.context.status === 'out') {
+				console.log('out')
+				ractive.set(event.keypath + '.status','in')
+				ractive.set(event.keypath + '.statusText','rule out')
+				moneyPool = moneyPool + event.context.amount;
+				ractive.animate('moneyPool',moneyPool);
+				revenue = revenue + event.context.amount;
+				ractive.animate('revenue',revenue);
+				console.log(moneyPool);
+				groupStatus[event.context.group] = false;
+				
+				taxItems.forEach( function (item) {
+					if (item['group'] === event.context.group && item['id'] != event.context.id) {
+						console.log(item);
+						item['status'] = "unavailable";
+						item['statusText'] = "unavailable";
+					}
+				});
+				ractive.set('taxItems',taxItems);
+
+
+			}
+			else if (event.context.status === 'in') {
+				console.log('in')
+				ractive.set(event.keypath + '.status','out')
+				ractive.set(event.keypath + '.statusText','rule in')
+				moneyPool = moneyPool - event.context.amount;
+				ractive.animate('moneyPool',moneyPool);
+				ractive.set('moneyPool',moneyPool);
+				revenue = revenue - event.context.amount;
+				ractive.animate('revenue',revenue);
+				console.log(moneyPool);
+			}
+		}
+
+		else if (groupStatus[event.context.group] == false) {
+
+			if (event.context.status === 'in') {
+				console.log('in')
+				ractive.set(event.keypath + '.status','out')
+				ractive.set(event.keypath + '.statusText','rule in')
+				moneyPool = moneyPool - event.context.amount;
+				ractive.animate('moneyPool',moneyPool);
+				ractive.set('moneyPool',moneyPool);
+				revenue = revenue - event.context.amount;
+				ractive.animate('revenue',revenue);
+				console.log(moneyPool);
+				groupStatus[event.context.group] = true;
+
+				taxItems.forEach( function (item) {
+					if (item['group'] === event.context.group && item['id'] != event.context.id) {
+						console.log(item);
+						item['status'] = "out";
+						item['statusText'] = "rule in";
+					}
+				});
+				ractive.set('taxItems',taxItems);
+			
+			}
+
+			else if (event.context.status === 'unavailable') {
+				console.log('unavailable');
+			}
+
+		}
+
+	});	
+	
 
 	//Sticky nav within iframe
 
