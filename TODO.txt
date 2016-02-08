@@ -1,0 +1,6 @@
+TODO 
+
+-social links
+-summary text at bottom
+-fw estimates graph
+-reset button
