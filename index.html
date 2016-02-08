@@ -19,15 +19,21 @@
 	  <script id='template' type='text/ractive'>
 	  	<div class='grid-wrapper'>
 		  	<div class='row taxItems'>
-			  	<div class='row'>	
-			  		<img src='img/piggy.svg' class='headerIcon'/>
-			  		<h2>First, rule in some tax changes</h2>
+			  	<div class='row'>
+			  		<div class='left-flex'>
+			  			<img src='img/piggy.svg' class='headerIcon'/>
+			  		</div>
+			  		<div class='main-col'>	
+			  			<h2>First, rule in some tax changes</h2>
+			  			{{#if hashStatus == true}}<div class='reset-warning'>You're looking at someone else's results. You can <span class='btn' on-click='resetPage'>Reset</span> to make your own tax package, or keep looking. The items with green buttons have been ruled in.</div>{{/if}}
+			  		</div>
 			  	</div>
 		     {{#each taxItems}}
 			    <div class='card '>
 				    <div class='main'>
-					    <h3>{{title}}</h3>
-						<p>{{description}}</p>
+					    <h3 class='{{status}}'>{{title}}</h3>
+						<p>{{description}} {{#if source}}Source: <a href='{{sourcelink}}' target='_blank'>{{source}}</a>{{/if}}</p>
+						
 					</div>
 					<div class='footer'>
 						<div class='footer-bar {{status}}' style='width: {{ (amount / total)*100 }}%;'>
@@ -53,8 +59,12 @@
 	  		</div>
 	  		<div class='row spendingItems'>
 		  		<div class='row'>
-		  			<img src='img/dollars.svg' class='headerIcon'/>
-		  			<h2>Then, spend some money</h2>
+		  			<div class='left-flex'>
+		  				<img src='img/dollars.svg' class='headerIcon'/>
+		  			</div>
+		  			<div class='main-col'>
+		  				<h2>Then, spend some money</h2>
+		  			</div>
 		  		</div>
 	  		 {{#each spendingItems}}
 			    <div class='card '>
@@ -75,7 +85,27 @@
 				</div>
 	  		{{/each}}
 	  		</div>
-	  	</div>	
+	  	
+	  		<div class='row resultSummary'>
+	  		<div class='row'>
+	  			<div class='left-flex'>
+	  				<img src='img/clipboard.svg' class='headerIcon'/>
+	  			</div>	
+	  			<div class='main-col'>
+	  				<h2>Here are your results</h2>
+	  			</div>
+		  	</div>
+		  	<div class='row offset'>
+		  		<div class='main-col results-text'>
+		  		Over the next year, you will raise <b>{{format(revenue)}}</b> in additional revenue. You have also committed to spending <b class='red'>{{format(spending)}}</b>, which leaves you with a total balance of <b class='moneyText {{moneyClass(moneyPool)}}'>{{format(moneyPool)}}</b>.
+		  		</div>
+		  	</div>
+	  		</div>	
+
+	  	</div>
+	  	<div class='row spacer'>
+	  	</div>
+	  	
   		<div class='sticky-bar'>
   			<div class='sticky-inner'>
   				<div class='spending-figures'>

@@ -42,7 +42,6 @@ iframeMessenger.enableAutoResize();
 
 function init() {
 
-
 	//get spreadsheet data
 
 	var url = "https://interactive.guim.co.uk/docsdata/1dWJohsLU1Rm-0yeJI9sxjGmzopQBrfME4NKY0xNtRQg.json";
@@ -57,7 +56,6 @@ function init() {
 }
 
 function formatNumber(num) {
-        //console.log("num",num);
 
         //check if num is positive or negative
 
@@ -76,8 +74,6 @@ function formatNumber(num) {
 
         return num;
     }
-
-
 
 //Hash url - store custom ministry values in url hash
 
@@ -118,7 +114,7 @@ function parseHash() {
 	if (window.self !== window.top) {
 	 iframeMessenger.getLocation(function(parLocation){
 	   var urlHash = parLocation['hash'];
-	   if (urlHash != "") {
+	   if (urlHash != "" && urlHash != "#?") {
 			urlHash = urlHash.replace("#?","");
 		    hashData = urlHash.split(",");
 		    return hashData;
@@ -129,10 +125,10 @@ function parseHash() {
 
 	 });
    	}
-
    	else {
 	   var urlHash = location.hash;
-	   if (urlHash != "") {
+	   console.log(urlHash);
+	   if (urlHash != "" && urlHash != "#?") {
 			urlHash = urlHash.replace("#?","");
 			hashData = urlHash.split(",");
 			return hashData;
@@ -145,8 +141,6 @@ function parseHash() {
 
 };
 
-
-
 function buildTaxcuts(data) {
 
 	var total = 0;
@@ -157,7 +151,14 @@ function buildTaxcuts(data) {
 	var groupTitles = [];
 	var hashData = parseHash();
  	var hashList = [];
+ 	var groupHashList = [];
+ 	var groupStatus = {};
+ 	var hashStatus = false;
+ 	var origData = jQuery.extend({}, data);
 
+ 	if (hashData != null) {
+ 		hashStatus = true;
+ 	};
 
 	function hashUrl(data) {
 
@@ -200,68 +201,101 @@ function buildTaxcuts(data) {
 
 	console.log("hashData", hashData);
 
-	$.each(data, function(i,v) {
+
+	function setupData(data) {
+		$.each(data, function(i,v) {
 		v.amount = +v.amount;
 		v.textAmount = formatNumber(v.amount);
 		total = total + v.amount;
-		if (hashData.indexOf(String(i)) != -1) {
-			v.status = 'in';
-			v.statusText = 'rule out';
-		}
-		else {
-			v.status = 'out';
-			v.statusText = 'rule in';
-		}
-		
+	
 		v.id = i;
 		if (v.group != "") {
 			if (groupTitles.indexOf(v.group) == -1) {
 				groupTitles.push(v.group);
 			}
 		};
+
+		//Handle hash data from the URL 
+
+		if (hashData != null) {
+
+			if (hashData.indexOf(String(i)) != -1) {
+				v.status = 'in';
+				v.statusText = 'rule out';
+				if (v.group != "") {
+					groupHashList.push({"id":v.id,"group":v.group})	
+				}
+				}
+			else {
+				v.status = 'out';
+				v.statusText = 'rule in';
+			}
+		}
+
+		else {
+			v.status = 'out';
+			v.statusText = 'rule in';
+		}
 		
-	});
+		});
+	
 
-	console.log(groupTitles);
+		console.log("groupTitles",groupTitles);
+		console.log("groupHashList",groupHashList);
 
-	groupStatus = {};
+		groupTitles.forEach( function(title) {
+				groupStatus[title] = true;
+		});
 
-	groupTitles.forEach( function(title) {
-		groupStatus[title] = true;
-	});
+		if (hashData != null) {
+			groupHashList.forEach(function(groupHash) {
+				data.forEach( function(d) {
+					if (d.group === groupHash.group) {
+						if (d.id != groupHash.id) {
+							d.status = 'unavailable';
+							d.statusText = 'unavailable';
+						}
+					}
+				});
 
-	console.log(groupStatus);
+			groupStatus[groupHash.group] = false;	
+			});
+		};
 
-	taxItems = data.filter(function(d) {
-		if (d.type === 'tax') {
-			return d;
+		console.log("groupStatus",groupStatus);
+
+		taxItems = data.filter(function(d) {
+			if (d.type === 'tax') {
+				return d;
+			}
+		});
+
+		spendingItems = data.filter(function(d) {
+			if (d.type === 'spending') {
+				return d;
+			}
+		});
+
+		if (hashData != null) {
+			taxItems.forEach(function(d) {
+				if (hashData.indexOf(String(d.id)) != -1) {
+						revenue = revenue + d['amount'];
+						moneyPool = moneyPool + d['amount'];
+					};
+			});
+
+			spendingItems.forEach( function(d) {
+			if (hashData.indexOf(String(d.id)) != -1) {
+					spending = spending + d['amount'];
+					moneyPool = moneyPool - d['amount'];
+				};
+			})
 
 		}
-	});
 
-	taxItems.forEach(function(d) {
-		if (hashData.indexOf(String(d.id)) != -1) {
-				revenue = revenue + d['amount'];
-				moneyPool = moneyPool + d['amount'];
-			};
-	});
+	}	
 
-	spendingItems = data.filter(function(d) {
-		if (d.type === 'spending') {
-			return d;
-		}
-	});
-
-	spendingItems.forEach( function(d) {
-		if (hashData.indexOf(String(d.id)) != -1) {
-				spending = spending + d['amount'];
-				moneyPool = moneyPool - d['amount'];
-			};
-	})
-
-
-
-	console.log(revenue,spending,moneyPool);
+	setupData(data);
 
 	var ractive = new Ractive({
 	el: '#container',
@@ -270,6 +304,7 @@ function buildTaxcuts(data) {
 		spendingItems: spendingItems,
 		total: total,
 		moneyPool: moneyPool,
+		hashStatus: hashStatus,
 		revenue: revenue,
 		spending: spending,
 		groupStatus: groupStatus,
@@ -318,6 +353,26 @@ function buildTaxcuts(data) {
     	}
 		},
 	template: '#template'
+	});
+
+	ractive.on( 'resetPage', function (event) { 
+		if ( window.self !== window.top ) {
+			iframeMessenger.navigate('/');
+			iframeMessenger.getLocation(function(parLocation) {
+			linkURL = parLocation['origin'] + parLocation['pathname'] + "%23" + data.join(",");
+			tweetLinkURL = "https://twitter.com/intent/tweet?text=Here's+my+ideal+new+parliamentary+cabinet+&url=" + linkURL;	
+			$("#tweet").attr("href", tweetLinkURL);
+		});
+
+		}
+		else {
+			window.location.hash = '?';
+			linkURL = window.location.origin + window.location.pathname + "%23" + data.join(",");
+			tweetLinkURL = "https://twitter.com/intent/tweet?text=Here's+my+ideal+new+parliamentary+cabinet&url=" + linkURL;	
+			$("#tweet").attr("href", tweetLinkURL);
+		}
+
+		location.reload();
 	});
 
 	ractive.on( 'toggleItem', function (event) {
@@ -460,6 +515,7 @@ function buildTaxcuts(data) {
 	});	
 	
 
+	
 	//Sticky nav within iframe
 
 	if (window!=window.top) { 
