@@ -69,8 +69,8 @@
 	  		 {{#each spendingItems}}
 			    <div class='card '>
 				    <div class='main'>
-					    <h3>{{title}}</h3>
-						<p>{{description}}</p>
+					    <h3 class='{{status}}'>{{title}}</h3>
+						<p>{{description}} {{#if source}}Source: <a href='{{sourcelink}}' target='_blank'>{{source}}</a>{{/if}}</p>
 					</div>
 					<div class='footer'>
 						<div class='footer-bar {{status}}' style='width: {{ (amount / total)*100 }}%;'>
@@ -78,7 +78,14 @@
 						<div class='footer-total chartSans'>
 							{{format(amount)}}
 						</div>
-						<div class='btn {{status}}' on-click='toggleItem'>
+						<div class='btn {{status}}' on-click='
+						{{#if group != ""}}
+							toggleItemGroup
+						{{else}}
+							toggleItem
+						{{/if}}
+
+						'>
 							{{statusText}}
 						</div>
 					</div>
@@ -97,12 +104,22 @@
 		  	</div>
 		  	<div class='row offset'>
 		  		<div class='main-col results-text'>
-		  		Over the next year, you will raise <b>{{format(revenue)}}</b> in additional revenue. You have also committed to spending <b class='red'>{{format(spending)}}</b>, which leaves you with a total balance of <b class='moneyText {{moneyClass(moneyPool)}}'>{{format(moneyPool)}}</b>.
+		  		Over the next year, you will raise <b>{{format(revenue)}}</b> in additional revenue. You have also committed to spending <b class='red'>{{format(spending)}}</b>, which leaves you with a total balance of <b class='moneyText {{moneyClass(moneyPool)}}'>{{format(moneyPool)}}</b>. <a href='{{tweetLinkURL}}' target='_blank'>Tweet this</a>, or share with <a href='{{linkURL}}' target='_blank'>this link</a>.
 		  		</div>
 		  	</div>
 	  		</div>	
 
+	  			<div class='row'>
+	  		<div class='offset'>
+	  		<div class='main-col'>
+	  			<h3>Notes</h3>
+	  			<p class='chartNotes'>The years for which costings and revenue estimates are available for items shown above is highly variable. As such, the costs shown above do not reflect any actual possible budget outcome and are a simplification for the purposes of this feature. Several items have also had total cost estimates abstracted to an ongoing yearly amount for the purposes of this feature. In reality, infrastructure investment items would likely not be funded in this way, but they have been included to allow readers to demonstrate their preference towards funding different policy items.</p>
+	  		</div>
+	  		</div>
 	  	</div>
+
+	  	</div>
+
 	  	<div class='row spacer'>
 	  	</div>
 	  	

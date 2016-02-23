@@ -44,12 +44,45 @@ function init() {
 
 	//get spreadsheet data
 
-	var url = "https://interactive.guim.co.uk/docsdata/1dWJohsLU1Rm-0yeJI9sxjGmzopQBrfME4NKY0xNtRQg.json";
+	var url = "https://interactive.guim.co.uk/docsdata/1MwBCUDPSQufh_eYih8NcQzNXHIPjZ5kf9rrRlREmXBE.json";
+	var hashData;
 
 	$.getJSON(url, function(spreadsheet){
 
 		data = spreadsheet.sheets.Sheet1;
-		buildTaxcuts(data);
+
+		if (window.self !== window.top) {
+		 	iframeMessenger.getLocation(function(parLocation){
+			var urlHash = parLocation['hash'];
+			if (urlHash != "" && urlHash != "#?") {
+		   		console.log("yeah");
+				urlHash = urlHash.replace("#?","");
+			    hashData = urlHash.split(",");
+			    buildTaxcuts(data,hashData);
+			}
+		   else {
+		   		hashData = null;
+		   		buildTaxcuts(data,hashData);
+		   }
+
+			});
+   		}
+		else {
+			var urlHash = location.hash;
+			console.log(urlHash);
+			if (urlHash != "" && urlHash != "#?") {
+				urlHash = urlHash.replace("#?","");
+				hashData = urlHash.split(",");
+				buildTaxcuts(data,hashData);
+			}
+
+			else {
+				hashData = null;
+				buildTaxcuts(data,hashData);
+			}
+		}
+		
+
 
 	});
 
@@ -77,110 +110,65 @@ function formatNumber(num) {
 
 //Hash url - store custom ministry values in url hash
 
-function hashUrl() {
-
-	var linkURL,tweetLinkURL;
-	var tempList = [];
-
-	ministry.forEach(function(d,i){
-		tempList.push(d['polID']+'-'+d['minID']);
-	});
-
-	urlString = "#" + tempList.join(",");
-
-	// var linkURL,tweetLinkURL;
-
-	if ( window.self !== window.top ) {
-		iframeMessenger.navigate(urlString);
-		iframeMessenger.getLocation(function(parLocation) {
-		linkURL = parLocation['origin'] + parLocation['pathname'] + "%23" + tempList.join(",");
-		tweetLinkURL = "https://twitter.com/intent/tweet?text=Here's+my+ideal+new+parliamentary+cabinet+&url=" + linkURL;	
-		$("#tweet").attr("href", tweetLinkURL);
-	});
-
-	}
-
-	else {
-		window.location.hash = urlString;
-		linkURL = window.location.origin + window.location.pathname + "%23" + tempList.join(",");
-		tweetLinkURL = "https://twitter.com/intent/tweet?text=Here's+my+ideal+new+parliamentary+cabinet&url=" + linkURL;	
-		$("#tweet").attr("href", tweetLinkURL);
-	}
-
-}
-
-function parseHash() {
-
-	if (window.self !== window.top) {
-	 iframeMessenger.getLocation(function(parLocation){
-	   var urlHash = parLocation['hash'];
-	   if (urlHash != "" && urlHash != "#?") {
-			urlHash = urlHash.replace("#?","");
-		    hashData = urlHash.split(",");
-		    return hashData;
-	   }
-	   else {
-	   		return null;
-	   }
-
-	 });
-   	}
-   	else {
-	   var urlHash = location.hash;
-	   console.log(urlHash);
-	   if (urlHash != "" && urlHash != "#?") {
-			urlHash = urlHash.replace("#?","");
-			hashData = urlHash.split(",");
-			return hashData;
-	   }
-
-	   else {
-	   	return null;
-	   }
-	}
-
-};
-
-function buildTaxcuts(data) {
+function buildTaxcuts(data,hashData) {
 
 	var total = 0;
-	var taxItems,spendingItems;
+	var taxItems,spendingItems
 	var revenue = 0;
 	var spending = 0;
 	var moneyPool = 0;
 	var groupTitles = [];
-	var hashData = parseHash();
  	var hashList = [];
  	var groupHashList = [];
  	var groupStatus = {};
  	var hashStatus = false;
  	var origData = jQuery.extend({}, data);
+ 	var tweetLinkURL = "https://twitter.com/intent/tweet?text=Here's+my+plan+for+tax+reform+in+Australia:+&url=http://www.theguardian.com/australia-news/datablog/ng-interactive/2016/feb/10/show-turnbull-how-its-done-make-your-own-tax-reforms-interactive&hashtags=ruleinruleout";
+ 	var linkURL = 'http://www.theguardian.com/australia-news/datablog/ng-interactive/2016/feb/10/show-turnbull-how-its-done-make-your-own-tax-reforms-interactive';
 
  	if (hashData != null) {
  		hashStatus = true;
  	};
 
-	function hashUrl(data) {
+ 	if ( window.self !== window.top ) {
+ 			console.log("yep")
+			iframeMessenger.getLocation(function(parLocation) {
+			console.log(parLocation);	
+			linkURL = parLocation['href'];
+			tweetLinkURL = "https://twitter.com/intent/tweet?text=Here's+my+plan+for+tax+reform+in+Australia:+&url=" + linkURL.replace("#", "%23") + "&hashtags=ruleinruleout";
+		});
 
-		var urlString = "#?" + data.join(",");
+		}
+
+	else {
+		linkURL = window.location.href;
+		tweetLinkURL = "https://twitter.com/intent/tweet?text=Here's+my+plan+for+tax+reform+in+Australia:+&url=" + (linkURL.replace("#", "%23")) + "&hashtags=ruleinruleout";
+	}
+
+	function hashUrl(urldata) {
+
+		var urlString = "#?" + urldata.join(",");
 
 		// var linkURL,tweetLinkURL;
 
 		if ( window.self !== window.top ) {
 			iframeMessenger.navigate(urlString);
 			iframeMessenger.getLocation(function(parLocation) {
-			linkURL = parLocation['origin'] + parLocation['pathname'] + "%23" + data.join(",");
-			tweetLinkURL = "https://twitter.com/intent/tweet?text=Here's+my+ideal+new+parliamentary+cabinet+&url=" + linkURL;	
-			$("#tweet").attr("href", tweetLinkURL);
+			linkURL = parLocation['href'];
+			tweetLinkURL = "https://twitter.com/intent/tweet?text=Here's+my+plan+for+tax+reform+in+Australia:+&url=" + parLocation['origin'] + parLocation['pathname'] + "%23" + urldata.join(",") + "&hashtags=ruleinruleout";
+			ractive.set('tweetLinkURL',tweetLinkURL);
+			ractive.set('linkURL',linkURL);
 		});
 
 		}
 
 		else {
 			window.location.hash = urlString;
-			linkURL = window.location.origin + window.location.pathname + "%23" + data.join(",");
-			tweetLinkURL = "https://twitter.com/intent/tweet?text=Here's+my+ideal+new+parliamentary+cabinet&url=" + linkURL;	
-			$("#tweet").attr("href", tweetLinkURL);
+			linkURL = window.location.origin + window.location.pathname + "#" + urldata.join(",");
+			tweetLinkURL = "https://twitter.com/intent/tweet?text=Here's+my+plan+for+tax+reform+in+Australia:+&url=" + window.location.origin + window.location.pathname + "%23" + urldata.join(",") + "&hashtags=ruleinruleout";
+			ractive.set('tweetLinkURL',tweetLinkURL);
+			ractive.set('linkURL',linkURL);	
+			
 		}
 
 	}
@@ -195,12 +183,8 @@ function buildTaxcuts(data) {
 				hashList.splice(i, 1);
 			}
  		}
- 		console.log(hashList);
  		hashUrl(hashList);
  	}
-
-	console.log("hashData", hashData);
-
 
 	function setupData(data) {
 		$.each(data, function(i,v) {
@@ -222,6 +206,7 @@ function buildTaxcuts(data) {
 			if (hashData.indexOf(String(i)) != -1) {
 				v.status = 'in';
 				v.statusText = 'rule out';
+				hashList.push(i);
 				if (v.group != "") {
 					groupHashList.push({"id":v.id,"group":v.group})	
 				}
@@ -238,10 +223,7 @@ function buildTaxcuts(data) {
 		}
 		
 		});
-	
 
-		console.log("groupTitles",groupTitles);
-		console.log("groupHashList",groupHashList);
 
 		groupTitles.forEach( function(title) {
 				groupStatus[title] = true;
@@ -261,8 +243,6 @@ function buildTaxcuts(data) {
 			groupStatus[groupHash.group] = false;	
 			});
 		};
-
-		console.log("groupStatus",groupStatus);
 
 		taxItems = data.filter(function(d) {
 			if (d.type === 'tax') {
@@ -297,14 +277,24 @@ function buildTaxcuts(data) {
 
 	setupData(data);
 
+	Ractive.DEBUG = false;
 	var ractive = new Ractive({
 	el: '#container',
+	complete: function () {
+    var maxHeight = Math.max.apply(null, $(".card .main").map(function ()
+		{
+		    return $(this).height();
+		}).get());
+    $(".card ").height(maxHeight + 60);
+	},
 	data: {
 		taxItems: taxItems,
 		spendingItems: spendingItems,
 		total: total,
 		moneyPool: moneyPool,
 		hashStatus: hashStatus,
+		tweetLinkURL: tweetLinkURL,
+		linkURL:linkURL,
 		revenue: revenue,
 		spending: spending,
 		groupStatus: groupStatus,
@@ -357,19 +347,21 @@ function buildTaxcuts(data) {
 
 	ractive.on( 'resetPage', function (event) { 
 		if ( window.self !== window.top ) {
-			iframeMessenger.navigate('/');
+			iframeMessenger.navigate('?');
 			iframeMessenger.getLocation(function(parLocation) {
-			linkURL = parLocation['origin'] + parLocation['pathname'] + "%23" + data.join(",");
-			tweetLinkURL = "https://twitter.com/intent/tweet?text=Here's+my+ideal+new+parliamentary+cabinet+&url=" + linkURL;	
-			$("#tweet").attr("href", tweetLinkURL);
+			linkURL = parLocation['origin'] + parLocation['pathname'];
+			tweetLinkURL = "https://twitter.com/intent/tweet?text=Here's+my+plan+for+tax+reform+in+Australia:+&url=" + linkURL + "&hashtags=ruleinruleout";	
+			ractive.set('tweetLinkURL',tweetLinkURL);
+			ractive.set('linkURL',linkURL);
 		});
 
 		}
 		else {
 			window.location.hash = '?';
-			linkURL = window.location.origin + window.location.pathname + "%23" + data.join(",");
-			tweetLinkURL = "https://twitter.com/intent/tweet?text=Here's+my+ideal+new+parliamentary+cabinet&url=" + linkURL;	
-			$("#tweet").attr("href", tweetLinkURL);
+			linkURL = window.location.origin + window.location.pathname;
+			tweetLinkURL = "https://twitter.com/intent/tweet?text=Here's+my+plan+for+tax+reform+in+Australia:+&url=" + linkURL + "&hashtags=ruleinruleout";	
+			ractive.set('tweetLinkURL',tweetLinkURL);
+			ractive.set('linkURL',linkURL);
 		}
 
 		location.reload();
@@ -377,29 +369,23 @@ function buildTaxcuts(data) {
 
 	ractive.on( 'toggleItem', function (event) {
 
-		console.log(event.context);
-
 		//check if tax or spending
 
 		if (event.context.type === 'tax') {
 
-				console.log('tax');
 
 				if (event.context.status === 'out') {
-				console.log('out')
+
 				ractive.set(event.keypath + '.status','in')
 				ractive.set(event.keypath + '.statusText','rule out')
 				moneyPool = moneyPool + event.context.amount;
 				ractive.animate('moneyPool',moneyPool);
 				revenue = revenue + event.context.amount;
 				ractive.animate('revenue',revenue);
-				console.log(moneyPool);
-				console.log(taxItems);
 				updateHashList(event.context.id,'add');
 			}
 
 			else if (event.context.status === 'in') {
-				console.log('in')
 				ractive.set(event.keypath + '.status','out')
 				ractive.set(event.keypath + '.statusText','rule in')
 				moneyPool = moneyPool - event.context.amount;
@@ -407,7 +393,6 @@ function buildTaxcuts(data) {
 				ractive.set('moneyPool',moneyPool);
 				revenue = revenue - event.context.amount;
 				ractive.animate('revenue',revenue);
-				console.log(moneyPool);
 				updateHashList(event.context.id,'remove');
 			}
 			
@@ -415,29 +400,24 @@ function buildTaxcuts(data) {
 
 		if (event.context.type === 'spending') {
 
-				console.log('spending');
 			
 				if (event.context.status === 'out') {
-				console.log('out')
 				ractive.set(event.keypath + '.status','in')
 				ractive.set(event.keypath + '.statusText','rule out')
 				moneyPool = moneyPool - event.context.amount;
 				ractive.animate('moneyPool',moneyPool);
 				spending = spending + event.context.amount;
 				ractive.animate('spending',spending);
-				console.log(moneyPool);
 				updateHashList(event.context.id,'add');
 			}
 
 			else if (event.context.status === 'in') {
-				console.log('in')
 				ractive.set(event.keypath + '.status','out')
 				ractive.set(event.keypath + '.statusText','rule in')
 				moneyPool = moneyPool + event.context.amount;
 				ractive.animate('moneyPool',moneyPool);
 				spending = spending - event.context.amount;
 				ractive.animate('spending',spending);
-				console.log(moneyPool);
 				updateHashList(event.context.id,'remove');
 			}
 
@@ -447,67 +427,116 @@ function buildTaxcuts(data) {
 	});
 
 	ractive.on( 'toggleItemGroup', function (event) {
-		console.log(event.context);
-		console.log("toggleItemGroup");
 
 		//has anythin in the group been selected?
 
-		if (groupStatus[event.context.group] == true) {
+		if (event.context.type === 'tax') {
 
-			if (event.context.status === 'out') {
-				console.log('out')
-				ractive.set(event.keypath + '.status','in')
-				ractive.set(event.keypath + '.statusText','rule out')
-				moneyPool = moneyPool + event.context.amount;
-				ractive.animate('moneyPool',moneyPool);
-				revenue = revenue + event.context.amount;
-				ractive.animate('revenue',revenue);
-				console.log(moneyPool);
-				groupStatus[event.context.group] = false;
+			if (groupStatus[event.context.group] == true) {
+
+				if (event.context.status === 'out') {
+					ractive.set(event.keypath + '.status','in')
+					ractive.set(event.keypath + '.statusText','rule out')
+					moneyPool = moneyPool + event.context.amount;
+					ractive.animate('moneyPool',moneyPool);
+					revenue = revenue + event.context.amount;
+					ractive.animate('revenue',revenue);
+					groupStatus[event.context.group] = false;
+					
+					taxItems.forEach( function (item) {
+						if (item['group'] === event.context.group && item['id'] != event.context.id) {
+							item['status'] = "unavailable";
+							item['statusText'] = "unavailable";
+						}
+					});
+					ractive.set('taxItems',taxItems);
+					updateHashList(event.context.id,'add');
+
+				}
+			}
+
+			else if (groupStatus[event.context.group] == false) {
+
+				if (event.context.status === 'in') {
+					ractive.set(event.keypath + '.status','out')
+					ractive.set(event.keypath + '.statusText','rule in')
+					moneyPool = moneyPool - event.context.amount;
+					ractive.animate('moneyPool',moneyPool);
+					ractive.set('moneyPool',moneyPool);
+					revenue = revenue - event.context.amount;
+					ractive.animate('revenue',revenue);
+					groupStatus[event.context.group] = true;
+
+					taxItems.forEach( function (item) {
+						if (item['group'] === event.context.group && item['id'] != event.context.id) {
+							item['status'] = "out";
+							item['statusText'] = "rule in";
+						}
+					});
+					ractive.set('taxItems',taxItems);
+					updateHashList(event.context.id,'remove');
 				
-				taxItems.forEach( function (item) {
-					if (item['group'] === event.context.group && item['id'] != event.context.id) {
-						console.log(item);
-						item['status'] = "unavailable";
-						item['statusText'] = "unavailable";
-					}
-				});
-				ractive.set('taxItems',taxItems);
-				updateHashList(event.context.id,'add');
+				}
+
+				else if (event.context.status === 'unavailable') {
+					console.log('unavailable');
+				}
 
 			}
 		}
 
-		else if (groupStatus[event.context.group] == false) {
+		if (event.context.type === 'spending') {
 
-			if (event.context.status === 'in') {
-				console.log('in')
-				ractive.set(event.keypath + '.status','out')
-				ractive.set(event.keypath + '.statusText','rule in')
-				moneyPool = moneyPool - event.context.amount;
-				ractive.animate('moneyPool',moneyPool);
-				ractive.set('moneyPool',moneyPool);
-				revenue = revenue - event.context.amount;
-				ractive.animate('revenue',revenue);
-				console.log(moneyPool);
-				groupStatus[event.context.group] = true;
+			if (groupStatus[event.context.group] == true) {
 
-				taxItems.forEach( function (item) {
-					if (item['group'] === event.context.group && item['id'] != event.context.id) {
-						console.log(item);
-						item['status'] = "out";
-						item['statusText'] = "rule in";
-					}
-				});
-				ractive.set('taxItems',taxItems);
-				updateHashList(event.context.id,'remove');
-			
+				if (event.context.status === 'out') {
+					ractive.set(event.keypath + '.status','in')
+					ractive.set(event.keypath + '.statusText','rule out')
+					moneyPool = moneyPool - event.context.amount;
+					ractive.animate('moneyPool',moneyPool);
+					spending = spending + event.context.amount;
+					ractive.animate('spending',spending);
+					groupStatus[event.context.group] = false;
+					
+					spendingItems.forEach( function (item) {
+						if (item['group'] === event.context.group && item['id'] != event.context.id) {
+							item['status'] = "unavailable";
+							item['statusText'] = "unavailable";
+						}
+					});
+					ractive.set('spendingItems',spendingItems);
+					updateHashList(event.context.id,'add');
+
+				}
 			}
 
-			else if (event.context.status === 'unavailable') {
-				console.log('unavailable');
-			}
+			else if (groupStatus[event.context.group] == false) {
 
+				if (event.context.status === 'in') {
+					ractive.set(event.keypath + '.status','out')
+					ractive.set(event.keypath + '.statusText','rule in')
+					moneyPool = moneyPool + event.context.amount;
+					ractive.animate('moneyPool',moneyPool);
+					spending = spending - event.context.amount;
+					ractive.animate('spending',spending);
+					groupStatus[event.context.group] = true;
+
+					spendingItems.forEach( function (item) {
+						if (item['group'] === event.context.group && item['id'] != event.context.id) {
+							item['status'] = "out";
+							item['statusText'] = "rule in";
+						}
+					});
+					ractive.set('spendingItems',spendingItems);
+					updateHashList(event.context.id,'remove');
+				
+				}
+
+				else if (event.context.status === 'unavailable') {
+					console.log('unavailable');
+				}
+
+			}
 
 		}
 
@@ -528,9 +557,9 @@ function buildTaxcuts(data) {
 			iframeMessenger.getPositionInformation(function(data){
 			
 					var endPoint = $end.position().top
-					console.log(endPoint);
-					console.log("pageYOffSet", data['pageYOffset'], "iframeTop", data['iframeTop'], "innerHeight", data['innerHeight']);
-					console.log(data['innerHeight'] - data['iframeTop']);
+					// console.log(endPoint);
+					// console.log("pageYOffSet", data['pageYOffset'], "iframeTop", data['iframeTop'], "innerHeight", data['innerHeight']);
+					// console.log(data['innerHeight'] - data['iframeTop']);
 
 						if (data['iframeTop'] < 0 && data['iframeTop'] > (-1*(endPoint-60)) && (data['innerHeight'] - data['iframeTop']) < endPoint) {
 
@@ -539,7 +568,6 @@ function buildTaxcuts(data) {
 						}
 
 						else if (data['iframeTop'] > 0 && (data['innerHeight'] - data['iframeTop']) < endPoint) {
-							console.log("yeah");
 							$sticky.css({top: data['innerHeight'] - data['iframeTop'] - 60})
 
 						}

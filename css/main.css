@@ -3,9 +3,9 @@
 	float:left;
 	width:32%;
 	margin-right:1%;
-	border-top:1px solid #dadada;
+	border-top:2px solid #dadada;
 	position: relative;
-	margin-bottom:10px;
+	margin-bottom:25px;
 }
 
 .grid-wrapper {
@@ -254,7 +254,7 @@ width:49%;
 
 .card {
 width:100%;
-min-height:200px;
+min-height:210px;
 margin-right:0;
 }
 
